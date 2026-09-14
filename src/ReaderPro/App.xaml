@@ -1,0 +1,7 @@
+<Application x:Class="ReaderPro.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <!-- 全局资源：主题、字体（M1 阶段先占位，M2 接主题系统） -->
+    </Application.Resources>
+</Application>

@@ -1,0 +1,222 @@
+<Window x:Class="ReaderPro.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ReaderPro.ViewModels"
+        xmlns:local="clr-namespace:ReaderPro"
+        Title="ReaderPro · 本地电子书阅读器"
+        Width="1200" Height="800" MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei UI" FontSize="14"
+        UseLayoutRounding="True">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:NullToVisibilityConverter x:Key="NullToVis"/>
+        <local:NullToVisibilityInverseConverter x:Key="NullToVisInverse"/>
+        <local:InverseBoolToVisibilityConverter x:Key="InverseVis"/>
+
+        <!-- 分类树模板 -->
+        <HierarchicalDataTemplate DataType="{x:Type vm:CategoryNode}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal" Margin="2">
+                <TextBlock Text="{Binding Icon}" Margin="0,0,6,0" Opacity="0.6"/>
+                <TextBlock Text="{Binding Name}"/>
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+        <!-- 书籍卡片模板（封面 84×112 + 信息；单击打开） -->
+        <DataTemplate DataType="{x:Type vm:BookCard}">
+            <Border Background="{Binding DataContext.ShelfBackground, RelativeSource={RelativeSource AncestorType=Window}}"
+                    CornerRadius="6" Margin="4" Padding="8" BorderBrush="#22000000" BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="{Binding DataContext.AccentBrush, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{Binding DataContext.AccentColor, RelativeSource={RelativeSource AncestorType=Window}}" Opacity="0.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="84" Height="112" CornerRadius="4" Background="#334E71"
+                            VerticalAlignment="Top">
+                        <Grid>
+                            <Image Source="{Binding Cover}" Stretch="UniformToFill"
+                                   Visibility="{Binding Cover, Converter={StaticResource NullToVisInverse}}"/>
+                            <TextBlock Text="{Binding Title, StringFormat={}{0}}" 
+                                       TextWrapping="Wrap" TextAlignment="Center"
+                                       Foreground="White" FontSize="16" Margin="6"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding Cover, Converter={StaticResource NullToVis}}"/>
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="15"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="300"/>
+                        <TextBlock Text="{Binding Sub}" Opacity="0.55" FontSize="12" Margin="0,4,0,0"/>
+                        <TextBlock Text="{Binding Description}" Opacity="0.5" FontSize="12" Margin="0,6,0,0"
+                                   TextWrapping="Wrap" MaxHeight="48" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding ProgressText}" Foreground="{Binding DataContext.AccentBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontSize="12" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ================= 顶部工具栏 ================= -->
+        <Border Grid.Row="0" Padding="10,8" BorderBrush="#22000000" BorderThickness="0,0,0,1"
+                Background="{Binding ShelfBackground}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 左：返回 / 书名 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Content="‹ 书架" Padding="10,4" Visibility="{Binding IsReading, Converter={StaticResource BoolToVis}}"
+                            Click="BackToShelf_Click"/>
+                    <TextBlock Text="{Binding CurrentBook.Title}" FontWeight="SemiBold" FontSize="16"
+                               Margin="12,0,0,0" VerticalAlignment="Center"
+                               Visibility="{Binding IsReading, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+
+                <!-- 中：搜索（书架模式） -->
+                <TextBox Grid.Column="1" Width="280" HorizontalAlignment="Left" Margin="16,0,0,0"
+                         VerticalContentAlignment="Center" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Visibility="{Binding IsReading, Converter={StaticResource InverseVis}}"/>
+
+                <!-- 右：操作按钮 -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <!-- 管理（导入/整理/批量） -->
+                    <Button Content="管理 ▾" Padding="12,5" Margin="0,0,8,0" Click="ManageMenu_Click"
+                            Visibility="{Binding IsReading, Converter={StaticResource InverseVis}}"/>
+                    <Button Content="A−" Padding="10,5" Margin="0,0,4,0" Click="FontDown_Click"/>
+                    <Button Content="A+" Padding="10,5" Margin="0,0,8,0" Click="FontUp_Click"/>
+                    <Button Content="主题" Padding="10,5" Margin="0,0,8,0" Click="Theme_Click"/>
+                    <Button Content="设置" Padding="10,5" Margin="0,0,8,0" Click="Settings_Click"/>
+                    <Button Content="听书" Padding="10,5" Click="Speak_Click"
+                            Visibility="{Binding IsReading, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ================= 主体 ================= -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 书架模式：分类树 -->
+            <Border Grid.Column="0" Width="230" BorderBrush="#22000000" BorderThickness="0,0,1,0"
+                    Background="{Binding ShelfBackground}"
+                    Visibility="{Binding IsReading, Converter={StaticResource InverseVis}}">
+                <TreeView ItemsSource="{Binding Categories}" SelectedItemChanged="Category_Changed"
+                          Background="Transparent" BorderThickness="0" Padding="4"/>
+            </Border>
+
+            <!-- 书架模式：单列宽卡片（封面+书名+作者+简介） -->
+            <ListBox Grid.Column="1" Margin="0,0,0,0" BorderThickness="0"
+                     ItemsSource="{Binding Books}" SelectionChanged="Book_Selected"
+                     Background="{Binding ShelfBackground}"
+                     Visibility="{Binding IsReading, Converter={StaticResource InverseVis}}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     MouseDoubleClick="Book_DoubleClick"/>
+
+            <!-- 阅读模式：章节 + 正文 -->
+            <Grid Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding IsReading, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 章节列表 -->
+                <Border Grid.Column="0" BorderBrush="#22000000" BorderThickness="0,0,1,0"
+                        Background="{Binding ShelfBackground}">
+                    <ListBox ItemsSource="{Binding Chapters}" SelectedIndex="{Binding SelectedChapterIndex}"
+                             Background="Transparent" BorderThickness="0" Padding="4">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" Padding="2"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+
+                <!-- 正文 -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ListBox Grid.Row="0" x:Name="BodyList" ItemsSource="{Binding Paragraphs}"
+                             Background="{Binding PageBackground}" Foreground="{Binding PageForeground}"
+                             BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.ScrollUnit="Pixel">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Style.Triggers>
+                                    <!-- 朗读当前段高亮（读到哪高亮到哪） -->
+                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter Property="Background" Value="{Binding DataContext.ParagraphHighlightBrush, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="{Binding DataContext.FontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                           LineHeight="{Binding DataContext.LineHeight, RelativeSource={RelativeSource AncestorType=Window}}"
+                                           Margin="48,10,48,10"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- 底部控制条 -->
+                    <Border Grid.Row="1" Padding="12,6" Background="{Binding ShelfBackground}"
+                            BorderBrush="#22000000" BorderThickness="0,1,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="{Binding SpeakButtonText}" Padding="10,3" Margin="0,0,6,0" Click="Speak_Click"/>
+                            <Button Grid.Column="1" Content="■ 停止" Padding="10,3" Margin="0,0,12,0" Click="StopSpeak_Click"
+                                    Visibility="{Binding IsSpeaking, Converter={StaticResource BoolToVis}}"/>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="语速" Opacity="0.6" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Slider Width="140" Minimum="-5" Maximum="5" Value="0" TickFrequency="1" IsSnapToTickEnabled="True"
+                                        ValueChanged="Rate_Changed" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SpeakingStatus}" Opacity="0.6" Margin="16,0,0,0"
+                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="3" Text="{Binding ChapterTitle}" Opacity="0.6"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

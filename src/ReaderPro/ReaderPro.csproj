@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>   <!-- NotifyIcon 系统托盘（PRD 3.4.3） -->
+    <RootNamespace>ReaderPro</RootNamespace>
+    <AssemblyName>ReaderPro</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- 性能指标：Release 优化 + 启动路径精简 -->
+    <TieredPGO>true</TieredPGO>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <!-- PRD 6.1：空闲内存 ≤50MB / 阅读 ≤100MB / 500MB PDF ≤300MB -->
+  <PropertyGroup>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>false</PublishSingleFile>
+  </PropertyGroup>
+
+  <!-- 按 PRD 6.2 支持 x86/x64/ARM64：发布时指定 -r -->
+  <ItemGroup>
+    <!-- PDF 引擎（P2 前可先不启用） -->
+    <!-- <PackageReference Include="PdfiumViewer" Version="*" /> -->
+    <!-- 压缩包（P2 漫画/免解压） -->
+    <!-- <PackageReference Include="SharpCompress" Version="*" /> -->
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
