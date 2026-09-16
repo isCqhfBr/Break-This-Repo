@@ -170,7 +170,12 @@
                     <ListBox Grid.Row="0" x:Name="BodyList" ItemsSource="{Binding Paragraphs}"
                              Background="{Binding PageBackground}" Foreground="{Binding PageForeground}"
                              BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             VirtualizingPanel.ScrollUnit="Pixel">
+                             VirtualizingPanel.ScrollUnit="Pixel"
+                             VirtualizingStackPanel.IsVirtualizing="True"
+                             VirtualizingStackPanel.VirtualizationMode="Recycling"
+                             VirtualizingStackPanel.CacheLength="30,10"
+                             VirtualizingStackPanel.CacheLengthUnit="Page"
+                             ScrollViewer.IsDeferredScrollingEnabled="False">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Style.Triggers>
