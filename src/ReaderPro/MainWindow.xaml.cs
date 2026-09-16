@@ -147,6 +147,29 @@ public partial class MainWindow : Window
 
     private void BackToShelf_Click(object sender, RoutedEventArgs e) => _vm.CloseReading();
 
+    private bool _miniMode;
+    private void MiniMode_Click(object sender, RoutedEventArgs e)
+    {
+        _miniMode = !_miniMode;
+        if (_miniMode)
+        {
+            // 进入小窗：缩成窄长可缩放
+            WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.SingleBorderWindow;
+            ResizeMode = ResizeMode.CanResize;
+            Width = 420;
+            Height = 680;
+            Topmost = true;
+        }
+        else
+        {
+            // 恢复
+            Topmost = false;
+            Width = 1100;
+            Height = 720;
+        }
+    }
+
     private void FontUp_Click(object sender, RoutedEventArgs e) => _vm.FontSizeUp();
     private void FontDown_Click(object sender, RoutedEventArgs e) => _vm.FontSizeDown();
     private void Theme_Click(object sender, RoutedEventArgs e) => _vm.ToggleTheme();

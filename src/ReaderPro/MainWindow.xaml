@@ -203,20 +203,22 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="{Binding SpeakButtonText}" Padding="10,3" Margin="0,0,6,0" Click="Speak_Click"/>
-                            <Button Grid.Column="1" Content="■ 停止" Padding="10,3" Margin="0,0,12,0" Click="StopSpeak_Click"
+                            <Button Grid.Column="1" Content="■ 停止" Padding="10,3" Margin="0,0,6,0" Click="StopSpeak_Click"
                                     Visibility="{Binding IsSpeaking, Converter={StaticResource BoolToVis}}"/>
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Grid.Column="2" Content="小窗" Padding="10,3" Margin="0,0,12,0" Click="MiniMode_Click"/>
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="语速" Opacity="0.6" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <Slider Width="140" Minimum="-5" Maximum="5" Value="0" TickFrequency="1" IsSnapToTickEnabled="True"
                                         ValueChanged="Rate_Changed" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding SpeakingStatus}" Opacity="0.6" Margin="16,0,0,0"
                                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
-                            <TextBlock Grid.Column="3" Text="{Binding ChapterTitle}" Opacity="0.6"
+                            <TextBlock Grid.Column="4" Text="{Binding ChapterTitle}" Opacity="0.6"
                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                         </Grid>
                     </Border>
